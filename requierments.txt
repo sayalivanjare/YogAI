@@ -1,8 +1,9 @@
 streamlit
-opencv-python-headless
 mediapipe
 numpy
+Pillow
+opencv-python
 pyttsx3
-matplotlib
+
 
 
