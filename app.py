@@ -1,10 +1,10 @@
 import streamlit as st
-import cv2
-import mediapipe as mp
+from PIL import Image
 import numpy as np
 import time
 from pose_analysis import analyze_pose
 from feedback.voice import VoiceFeedback
+import mediapipe as mp
 
 # ---------------- STREAMLIT SETUP ----------------
 st.set_page_config(page_title="Yoga Pose Coach", layout="wide")
@@ -20,30 +20,27 @@ voice = VoiceFeedback(cooldown=feedback_interval)
 # Mediapipe setup
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+pose_model = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
-# Placeholder for camera frame
-frame_placeholder = st.image([])
+st.write("Capture your pose using the camera below:")
 
-# Initialize camera
-cap = cv2.VideoCapture(0)
+# Camera input (replaces cv2.VideoCapture)
+camera_input = st.camera_input("📸 Capture Frame")
+
 last_feedback_time = 0
 
-st.write("Press 'Stop' button below to end the session.")
+if camera_input:
+    # Convert camera input to numpy array
+    image = Image.open(camera_input)
+    frame = np.array(image)
+    h, w = frame.shape[:2]
 
-stop = st.button("Stop Session")
-
-while cap.isOpened() and not stop:
-    ret, frame = cap.read()
-    if not ret:
-        st.warning("Failed to read from camera.")
-        break
-
-    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = pose.process(rgb)
+    # Convert to RGB for MediaPipe
+    rgb = frame.copy()
+    # Process with MediaPipe
+    results = pose_model.process(rgb)
 
     overlay_text = ""
-    h, w = frame.shape[:2]
 
     if results.pose_landmarks:
         # Draw landmarks
@@ -55,9 +52,11 @@ while cap.isOpened() and not stop:
             mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2)
         )
 
-        # Convert landmarks
-        landmarks = {idx: (int(lm.x * w), int(lm.y * h), lm.z, lm.visibility)
-                     for idx, lm in enumerate(results.pose_landmarks.landmark)}
+        # Convert landmarks to dict
+        landmarks = {
+            idx: (int(lm.x * w), int(lm.y * h), lm.z, lm.visibility)
+            for idx, lm in enumerate(results.pose_landmarks.landmark)
+        }
 
         current_time = time.time()
         if current_time - last_feedback_time >= feedback_interval:
@@ -70,14 +69,13 @@ while cap.isOpened() and not stop:
                 voice.speak("Good posture, keep going")
             last_feedback_time = current_time
 
-    # Overlay text
+    # Overlay text on frame
     if overlay_text:
         color = (0, 0, 255) if "⚠️" in overlay_text else (0, 255, 0)
+        import cv2  # cv2 needed for putText only
         cv2.putText(frame, overlay_text, (30, 50), cv2.FONT_HERSHEY_SIMPLEX,
                     1, color, 2, cv2.LINE_AA)
 
-    # Update Streamlit image
-    frame_placeholder.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    st.image(frame, caption="Processed Frame", use_column_width=True)
 
-cap.release()
 st.write("Session Ended. Thank you for practicing!")
