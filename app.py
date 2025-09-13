@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import time
 from pose_analysis import analyze_pose
-from feedback.voice import VoiceFeedback
+from voice import VoiceFeedback
 import mediapipe as mp
 
 # ---------------- STREAMLIT SETUP ----------------
@@ -79,3 +79,4 @@ if camera_input:
     st.image(frame, caption="Processed Frame", use_column_width=True)
 
 st.write("✅ Session Ended. Thank you for practicing!")
+
