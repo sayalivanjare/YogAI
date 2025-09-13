@@ -1,20 +1,18 @@
-import pyttsx3
+from gtts import gTTS
 import time
 import threading
+import streamlit as st
+import tempfile
+import os
 
 class VoiceFeedback:
     def __init__(self, cooldown=2.0):
         """
-        Initializes the voice engine with a cooldown timer.
-        cooldown: Minimum seconds between two consecutive voice outputs.
+        Initializes voice feedback with a cooldown timer.
+        cooldown: Minimum seconds between consecutive feedback.
         """
-        self.engine = pyttsx3.init()
         self.cooldown = cooldown
         self.last_feedback_time = 0
-
-        # Optional: set voice properties
-        self.engine.setProperty('rate', 160)    # Speed of speech
-        self.engine.setProperty('volume', 1.0)  # Volume 0.0 to 1.0
 
     def speak(self, text):
         """
@@ -25,14 +23,24 @@ class VoiceFeedback:
         if current_time - self.last_feedback_time >= self.cooldown:
             self.last_feedback_time = current_time
             print(f"🗣️ Voice: {text}")  # Debug log
-
-            # Use threading to avoid blocking
             thread = threading.Thread(target=self._speak_thread, args=(text,))
             thread.start()
 
     def _speak_thread(self, text):
         try:
-            self.engine.say(text)
-            self.engine.runAndWait()
+            # Generate speech
+            tts = gTTS(text=text, lang='en')
+
+            # Use a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+                temp_path = tmp_file.name
+                tts.save(temp_path)
+
+            # Play in Streamlit
+            with open(temp_path, "rb") as audio_file:
+                st.audio(audio_file.read(), format="audio/mp3")
+
+            # Clean up
+            os.remove(temp_path)
         except Exception as e:
             print(f"⚠️ Voice feedback failed: {e}")
