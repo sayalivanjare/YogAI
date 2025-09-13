@@ -3,7 +3,4 @@ mediapipe
 numpy
 Pillow
 opencv-python
-pyttsx3
-
-
-
+gTTS
