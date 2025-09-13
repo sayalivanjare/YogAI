@@ -99,13 +99,3 @@ This project is for **educational purposes only**.
 
 [https://github.com/sayalivanjare/yoga-pose-coach](https://github.com/sayalivanjare/yoga-pose-coach)
 
----
-
-### 💡 Tips to Make It Even Better
-
-* Add **short GIFs** for each yoga pose for better visualization
-* Add a **YouTube/Loom demo video** for live interaction showcase
-* Include more badges: Python version, Streamlit version, last updated
-* Keep your `assets` folder organized with all screenshots and GIFs
-
----
