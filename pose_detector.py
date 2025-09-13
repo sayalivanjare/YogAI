@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import time
 from pose_analysis import analyze_pose
-from feedback.voice import VoiceFeedback
+from voice import VoiceFeedback
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
@@ -88,3 +88,4 @@ def run_pose_detection(camera_index=0, feedback_interval=2.5):
 
 if __name__ == "__main__":
     run_pose_detection()
+
